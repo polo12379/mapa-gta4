@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mapa</title>
+
+    <!-- ===== PWA / iOS / Android Meta Tags ===== -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mapa">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <meta name="msapplication-navbutton-color" content="#000000">
+    <meta name="msapplication-TileColor" content="#000000">
+    <meta name="application-name" content="Mapa">
+    <meta name="format-detection" content="telephone=no">
+
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <!-- ===== Mapbox GL JS ===== -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+
+    <!-- ===== Mapbox Geocoder Plugin ===== -->
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.2/mapbox-gl-geocoder.css" type="text/css">
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.2/mapbox-gl-geocoder.min.js"></script>
+
+    <style>
+        /* ===== RESET & BASE ===== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: #0a0a08;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== APP LAYOUT ===== */
+        #app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: env(safe-area-inset-top, 12px) 12px env(safe-area-inset-bottom, 12px) 12px;
+            gap: 14px;
+            position: relative;
+        }
+
+        /* ===== GEOCODER SEARCH BAR ===== */
+        #geocoder {
+            width: 85vw;
+            max-width: 420px;
+            z-index: 200;
+            flex-shrink: 0;
+        }
+
+        /* Dark theme overrides for Mapbox Geocoder */
+        .mapboxgl-ctrl-geocoder {
+            background-color: rgba(22, 20, 16, 0.92) !important;
+            border: 1px solid rgba(160, 140, 100, 0.3) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.03) !important;
+            min-width: 100% !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            font-size: 15px !important;
+        }
+
+        .mapboxgl-ctrl-geocoder--input {
+            color: #c8b888 !important;
+            padding: 8px 40px !important;
+            height: 44px !important;
+        }
+
+        .mapboxgl-ctrl-geocoder--input::placeholder {
+            color: rgba(160, 140, 100, 0.5) !important;
+        }
+
+        .mapboxgl-ctrl-geocoder--input:focus {
+            outline: none !important;
+        }
+
+        .mapboxgl-ctrl-geocoder--icon-search {
+            fill: rgba(160, 140, 100, 0.6) !important;
+            top: 12px !important;
+        }
+
+        .mapboxgl-ctrl-geocoder--button {
+            background: transparent !important;
+        }
+
+        .mapboxgl-ctrl-geocoder--icon-close {
+            fill: rgba(160, 140, 100, 0.6) !important;
+        }
+
+        .mapboxgl-ctrl-geocoder .suggestions {
+            background-color: rgba(22, 20, 16, 0.97) !important;
+            border: 1px solid rgba(160, 140, 100, 0.2) !important;
+            border-radius: 0 0 10px 10px !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+        }
+
+        .mapboxgl-ctrl-geocoder .suggestions > li > a {
+            color: #b0a070 !important;
+            padding: 10px 16px !important;
+        }
+
+        .mapboxgl-ctrl-geocoder .suggestions > .active > a,
+        .mapboxgl-ctrl-geocoder .suggestions > li > a:hover {
+            background-color: rgba(160, 140, 100, 0.12) !important;
+            color: #d4c090 !important;
+        }
+
+        .mapboxgl-ctrl-geocoder--powered-by {
+            display: none !important;
+        }
+
+        /* ===== RADAR FRAME ===== */
+        .radar-wrapper {
+            position: relative;
+            flex-shrink: 1;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+        }
+
+        .radar-outer {
+            position: relative;
+            width: 85vw;
+            height: 85vw;
+            max-width: min(500px, 70vh);
+            max-height: min(500px, 70vh);
+            border-radius: 50%;
+            background: #0d0c0a;
+        }
+
+        /* Outer decorative ring */
+        .radar-outer::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border-radius: 50%;
+            border: 2px solid rgba(140, 120, 80, 0.35);
+            box-shadow:
+                0 0 30px rgba(0, 0, 0, 0.8),
+                0 0 60px rgba(0, 0, 0, 0.4),
+                inset 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Inner radar container (clips the map) */
+        .radar-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            border: 2.5px solid rgba(160, 140, 100, 0.45);
+            box-shadow:
+                inset 0 0 40px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(0, 0, 0, 0.7);
+        }
+
+        /* ===== MAP ===== */
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* GTA IV sepia/dark tone filter applied to map canvas */
+        #map canvas {
+            filter: sepia(0.22) saturate(0.65) brightness(0.82) contrast(1.1);
+        }
+
+        /* Hide default Mapbox UI inside radar */
+        .mapboxgl-ctrl-bottom-left,
+        .mapboxgl-ctrl-bottom-right,
+        .mapboxgl-ctrl-top-left,
+        .mapboxgl-ctrl-top-right {
+            display: none !important;
+        }
+
+        /* ===== SCAN LINES OVERLAY (CRT EFFECT) ===== */
+        .scan-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 3px,
+                rgba(0, 0, 0, 0.04) 3px,
+                rgba(0, 0, 0, 0.04) 6px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* ===== VIGNETTE OVERLAY ===== */
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle at center,
+                transparent 40%,
+                rgba(0, 0, 0, 0.25) 65%,
+                rgba(0, 0, 0, 0.6) 85%,
+                rgba(0, 0, 0, 0.85) 100%
+            );
+            pointer-events: none;
+            z-index: 11;
+        }
+
+        /* ===== PLAYER MARKER (fixed center) ===== */
+        .player-marker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            filter: drop-shadow(0 0 8px rgba(230, 57, 70, 0.6))
+                    drop-shadow(0 0 16px rgba(230, 57, 70, 0.3));
+            transition: transform 0.4s ease-out;
+            pointer-events: none;
+        }
+
+        .player-marker svg {
+            display: block;
+        }
+
+        /* ===== GPS PULSE ANIMATION ===== */
+        .gps-pulse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(230, 57, 70, 0.15);
+            z-index: 15;
+            pointer-events: none;
+            animation: pulse 2.5s ease-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(3);
+                opacity: 0;
+            }
+        }
+
+        /* ===== NORTH INDICATOR ===== */
+        .north-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 22;
+            transition: transform 0.3s ease-out;
+        }
+
+        .north-letter {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #d4a843;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(212, 168, 67, 0.5), 0 1px 3px rgba(0,0,0,0.8);
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        /* ===== LOADING INDICATOR ===== */
+        .loading-gps {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .loading-gps span {
+            display: block;
+            color: #d4a843;
+            font-size: 11px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 6px rgba(212, 168, 67, 0.4);
+            animation: blink 1.8s ease-in-out infinite;
+            margin-top: 50px;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .loading-gps.hidden {
+            display: none;
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            width: 85vw;
+            max-width: 420px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .status-coords {
+            color: rgba(160, 140, 100, 0.6);
+            font-size: 10px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .status-attribution {
+            color: rgba(120, 110, 85, 0.4);
+            font-size: 8px;
+            text-decoration: none;
+        }
+
+        .status-attribution a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* ===== RECENTER BUTTON ===== */
+        #recenter-btn {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 10px) + 70px);
+            right: 16px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(22, 20, 16, 0.92);
+            border: 1.5px solid rgba(160, 140, 100, 0.35);
+            color: #d4a843;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #recenter-btn:active {
+            transform: scale(0.92);
+            background: rgba(40, 36, 28, 0.95);
+        }
+
+        #recenter-btn.visible {
+            display: flex;
+        }
+
+        /* ===== ZOOM CONTROLS ===== */
+        .zoom-controls {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 10px) + 130px);
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 300;
+        }
+
+        .zoom-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(22, 20, 16, 0.85);
+            border: 1px solid rgba(160, 140, 100, 0.25);
+            color: #b0a070;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.9);
+            background: rgba(40, 36, 28, 0.95);
+        }
+
+        /* ===== SPEED DISPLAY ===== */
+        .speed-display {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 10px) + 70px);
+            left: 16px;
+            background: rgba(22, 20, 16, 0.88);
+            border: 1px solid rgba(160, 140, 100, 0.25);
+            border-radius: 10px;
+            padding: 8px 14px;
+            z-index: 300;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .speed-value {
+            color: #d4a843;
+            font-size: 22px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+
+        .speed-unit {
+            color: rgba(160, 140, 100, 0.5);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Search Bar -->
+        <div id="geocoder"></div>
+
+        <!-- Radar -->
+        <div class="radar-wrapper">
+            <div class="radar-outer">
+                <div class="radar-container">
+                    <div id="map"></div>
+
+                    <!-- Overlays -->
+                    <div class="scan-lines"></div>
+                    <div class="vignette"></div>
+
+                    <!-- GPS pulse ring -->
+                    <div class="gps-pulse" id="gps-pulse"></div>
+
+                    <!-- Player marker (navigation arrow) -->
+                    <div class="player-marker" id="player-marker">
+                        <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 3 L25 27 L16 21 L7 27 Z"
+                                  fill="#e63946"
+                                  stroke="#ffffff"
+                                  stroke-width="1.5"
+                                  stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+
+                    <!-- North indicator ring -->
+                    <div class="north-ring" id="north-ring">
+                        <span class="north-letter" id="north-letter">N</span>
+                    </div>
+
+                    <!-- Loading GPS -->
+                    <div class="loading-gps" id="loading-gps">
+                        <span>Adquiriendo señal GPS…</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span class="status-coords" id="status-coords">---.------, ---.------</span>
+            <span class="status-attribution">
+                <a href="https://www.mapbox.com/" target="_blank">© Mapbox</a> ·
+                <a href="https://www.openstreetmap.org/" target="_blank">© OSM</a>
+            </span>
+        </div>
+    </div>
+
+    <!-- Recenter Button -->
+    <button id="recenter-btn" title="Recentrar GPS">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <line x1="12" y1="2" x2="12" y2="6"/>
+            <line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="6" y2="12"/>
+            <line x1="18" y1="12" x2="22" y2="12"/>
+        </svg>
+    </button>
+
+    <!-- Zoom Controls -->
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoom-in" title="Acercar">+</button>
+        <button class="zoom-btn" id="zoom-out" title="Alejar">−</button>
+    </div>
+
+    <!-- Speed Display -->
+    <div class="speed-display">
+        <div class="speed-value" id="speed-value">0</div>
+        <div class="speed-unit">km/h</div>
+    </div>
+
+    <script>
+        /* ╔══════════════════════════════════════════════════════════════════╗
+         * ║                                                                ║
+         * ║   >>>  PEGA TU ACCESS TOKEN DE MAPBOX EN LA LÍNEA DE ABAJO  <<<║
+         * ║                                                                ║
+         * ║   Obtén tu token gratuito en: https://account.mapbox.com/      ║
+         * ║                                                                ║
+         * ╚══════════════════════════════════════════════════════════════════╝ */
+
+        // ██████████████████████████████████████████████████████████████████
+        // ██  REEMPLAZA 'TU_ACCESS_TOKEN_AQUI' CON TU TOKEN DE MAPBOX   ██
+        // ██████████████████████████████████████████████████████████████████
+        mapboxgl.accessToken = 'pk.eyJ1IjoicG9sMTBrIiwiYSI6ImNtdWxpM3F6dzAwcTIyd215cDE4bHh5NXcifQ.3h1DXZVz_-1esV7BZc-QKQ';
+        // ██████████████████████████████████████████████████████████████████
+
+        // ===== DOM Elements =====
+        const playerMarker    = document.getElementById('player-marker');
+        const northRing       = document.getElementById('north-ring');
+        const northLetter     = document.getElementById('north-letter');
+        const loadingGPS      = document.getElementById('loading-gps');
+        const statusCoords    = document.getElementById('status-coords');
+        const recenterBtn     = document.getElementById('recenter-btn');
+        const gpsPulse        = document.getElementById('gps-pulse');
+        const speedValue      = document.getElementById('speed-value');
+        const zoomInBtn       = document.getElementById('zoom-in');
+        const zoomOutBtn      = document.getElementById('zoom-out');
+
+        // ===== State =====
+        let followMode   = true;
+        let gpsAcquired  = false;
+        let currentCoords = null;
+
+        // ===== Initialize Map =====
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v11',
+            center: [0, 0],
+            zoom: 16,
+            pitch: 0,
+            bearing: 0,
+            attributionControl: false,
+            logoPosition: 'bottom-right',
+            interactive: true,
+            dragRotate: false,
+            touchZoomRotate: true,
+            touchPitch: false,
+            keyboard: false
+        });
+
+        // Disable compass rotation via touch (keep zoom gestures)
+        map.touchZoomRotate.disableRotation();
+
+        // ===== Zoom Controls =====
+        zoomInBtn.addEventListener('click', () => {
+            map.zoomIn({ duration: 300 });
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            map.zoomOut({ duration: 300 });
+        });
+
+        // ===== North Indicator =====
+        map.on('rotate', () => {
+            const bearing = map.getBearing();
+            northRing.style.transform = 'rotate(' + (-bearing) + 'deg)';
+            northLetter.style.transform = 'translateX(-50%) rotate(' + bearing + 'deg)';
+        });
+
+        // ===== Style Customization (GTA IV Radar Tones) =====
+        map.on('style.load', () => {
+            // Darken the background/land
+            try {
+                map.setPaintProperty('land', 'background-color', '#12110e');
+            } catch(e) {}
+
+            // Water — dark navy/teal
+            try {
+                map.setPaintProperty('water', 'fill-color', '#0e1a20');
+            } catch(e) {}
+
+            // Parks / green areas
+            const greenLayers = ['landuse', 'national-park'];
+            greenLayers.forEach(layer => {
+                try {
+                    map.setPaintProperty(layer, 'fill-color', [
+                        'match', ['get', 'class'],
+                        'park', '#141e14',
+                        'cemetery', '#141a14',
+                        'glacier', '#0e1a20',
+                        'hospital', '#1a1410',
+                        'pitch', '#141e14',
+                        'sand', '#1a1710',
+                        'school', '#1a1610',
+                        '#12110e' // default
+                    ]);
+                } catch(e) {}
+            });
+
+            // Buildings — dark warm grey
+            try {
+                map.setPaintProperty('building', 'fill-color', '#1a1814');
+                map.setPaintProperty('building', 'fill-opacity', 0.7);
+            } catch(e) {}
+
+            // Road colors — muted greys with warm tint
+            const roadLayers = [
+                'road-motorway-trunk',
+                'road-primary',
+                'road-secondary-tertiary',
+                'road-street',
+                'road-minor',
+                'road-construction',
+                'road-path',
+                'road-pedestrian'
+            ];
+            roadLayers.forEach(layer => {
+                try {
+                    map.setPaintProperty(layer, 'line-color', '#3a352c');
+                } catch(e) {}
+            });
+
+            // Major roads slightly brighter
+            try {
+                map.setPaintProperty('road-motorway-trunk', 'line-color', '#4a4438');
+                map.setPaintProperty('road-primary', 'line-color', '#44403a');
+            } catch(e) {}
+
+            // Road labels — warm muted
+            const labelLayers = [
+                'road-label',
+                'road-number-shield',
+                'road-exit-shield'
+            ];
+            labelLayers.forEach(layer => {
+                try {
+                    map.setPaintProperty(layer, 'text-color', '#6a6050');
+                    map.setPaintProperty(layer, 'text-halo-color', '#12110e');
+                } catch(e) {}
+            });
+
+            // POI labels
+            try {
+                map.setPaintProperty('poi-label', 'text-color', '#5a5545');
+                map.setPaintProperty('poi-label', 'text-halo-color', '#12110e');
+            } catch(e) {}
+
+            // Place labels
+            const placeLabelLayers = [
+                'settlement-major-label',
+                'settlement-minor-label',
+                'settlement-subdivision-label'
+            ];
+            placeLabelLayers.forEach(layer => {
+                try {
+                    map.setPaintProperty(layer, 'text-color', '#7a7060');
+                    map.setPaintProperty(layer, 'text-halo-color', '#12110e');
+                } catch(e) {}
+            });
+        });
+
+        // ===== Geocoder =====
+        const geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl,
+            placeholder: 'Buscar lugar…',
+            language: 'es',
+            marker: false,
+            flyTo: {
+                speed: 1.5,
+                zoom: 16
+            },
+            collapsed: false
+        });
+
+        document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+
+        // When a search result is selected, disable follow mode
+        geocoder.on('result', (e) => {
+            followMode = false;
+            recenterBtn.classList.add('visible');
+        });
+
+        // ===== Recenter Button =====
+        recenterBtn.addEventListener('click', () => {
+            followMode = true;
+            recenterBtn.classList.remove('visible');
+
+            if (currentCoords) {
+                map.easeTo({
+                    center: [currentCoords.longitude, currentCoords.latitude],
+                    zoom: 16,
+                    duration: 800
+                });
+            }
+        });
+
+        // When user manually drags the map, disable follow mode
+        map.on('dragstart', () => {
+            if (gpsAcquired) {
+                followMode = false;
+                recenterBtn.classList.add('visible');
+            }
+        });
+
+        // ===== GPS Tracking =====
+        if ('geolocation' in navigator) {
+            navigator.geolocation.watchPosition(
+                onGPSSuccess,
+                onGPSError,
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 2000,
+                    timeout: 10000
+                }
+            );
+        } else {
+            loadingGPS.querySelector('span').textContent = '⚠ GPS NO DISPONIBLE';
+        }
+
+        function onGPSSuccess(position) {
+            const { latitude, longitude, heading, speed } = position.coords;
+            currentCoords = position.coords;
+
+            // First fix — fly to position
+            if (!gpsAcquired) {
+                gpsAcquired = true;
+                loadingGPS.classList.add('hidden');
+
+                map.flyTo({
+                    center: [longitude, latitude],
+                    zoom: 16,
+                    duration: 1500
+                });
+            }
+
+            // Update speed (m/s → km/h)
+            if (speed !== null && !isNaN(speed) && speed >= 0) {
+                speedValue.textContent = Math.round(speed * 3.6);
+            } else {
+                speedValue.textContent = '0';
+            }
+
+            // Rotate player arrow based on heading
+            if (heading !== null && !isNaN(heading)) {
+                playerMarker.style.transform =
+                    'translate(-50%, -50%) rotate(' + heading + 'deg)';
+            }
+
+            // Update coordinates display
+            statusCoords.textContent =
+                latitude.toFixed(6) + ', ' + longitude.toFixed(6);
+
+            // Center map if following
+            if (followMode) {
+                map.easeTo({
+                    center: [longitude, latitude],
+                    duration: 600
+                });
+            }
+        }
+
+        function onGPSError(error) {
+            console.warn('GPS Error:', error.message);
+            const messages = {
+                1: '⚠ PERMISO GPS DENEGADO',
+                2: '⚠ SEÑAL GPS NO DISPONIBLE',
+                3: '⚠ TIEMPO DE ESPERA GPS AGOTADO'
+            };
+            loadingGPS.querySelector('span').textContent =
+                messages[error.code] || '⚠ ERROR GPS';
+            loadingGPS.classList.remove('hidden');
+        }
+
+        // ===== Service Worker Registration (optional for PWA) =====
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                // Service worker not found — app still works without offline support
+            });
+        }
+    </script>
+</body>
+</html>
