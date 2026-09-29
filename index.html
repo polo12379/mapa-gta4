@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mapa</title>
+    <title>Mapa GTA IV HUD</title>
 
     <!-- ===== PWA / iOS / Android Meta Tags ===== -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -71,7 +71,6 @@
             z-index: 500;
         }
 
-        /* Dark theme overrides for Geocoder — GTA IV style */
         .mapboxgl-ctrl-geocoder {
             background-color: rgba(18, 18, 16, 0.94) !important;
             border: 1.5px solid #4a4a44 !important;
@@ -137,7 +136,7 @@
             flex-shrink: 0;
         }
 
-        /* ===== HEALTH BAR ARC (outer green/black ring) ===== */
+        /* ===== HEALTH BAR RING ===== */
         .health-ring {
             position: absolute;
             top: -10px;
@@ -195,7 +194,7 @@
             border-radius: 50%;
             overflow: hidden;
             z-index: 3;
-            background: #111111;
+            background: #2A2D34;
         }
 
         /* ===== MAP ===== */
@@ -205,6 +204,7 @@
             position: absolute;
             top: 0;
             left: 0;
+            background-color: #2A2D34;
         }
 
         /* Hide ALL default Mapbox UI */
@@ -236,7 +236,7 @@
             z-index: 10;
         }
 
-        /* ===== PLAYER MARKER — GTA IV white arrow ===== */
+        /* ===== PLAYER MARKER — GTA IV white arrow (Fixed visually in center) ===== */
         .player-marker {
             position: absolute;
             top: 50%;
@@ -244,13 +244,13 @@
             transform: translate(-50%, -50%);
             z-index: 20;
             filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.95));
-            transition: transform 0.3s ease-out;
             pointer-events: none;
+            transition: transform 0.15s ease-out;
         }
 
         .player-marker svg { display: block; }
 
-        /* ===== NORTH INDICATOR — GTA IV style ===== */
+        /* ===== NORTH INDICATOR ===== */
         .north-ring {
             position: absolute;
             top: 0;
@@ -322,12 +322,12 @@
 
         .loading-gps span {
             display: block;
-            color: #8bc34a;
+            color: #4A7049;
             font-size: 10px;
             font-family: 'Courier New', monospace;
             letter-spacing: 1px;
             text-transform: uppercase;
-            text-shadow: 0 0 6px rgba(139, 195, 74, 0.5);
+            text-shadow: 0 0 6px rgba(74, 112, 73, 0.6);
             animation: blink 1.8s ease-in-out infinite;
             margin-top: 45px;
         }
@@ -395,7 +395,7 @@
             border-radius: 50%;
             background: rgba(20, 20, 16, 0.92);
             border: 2px solid #4a4a44;
-            color: #8bc34a;
+            color: #4A7049;
             font-size: 20px;
             cursor: pointer;
             z-index: 300;
@@ -518,7 +518,7 @@
 
         <!-- GTA IV HUD Radar -->
         <div class="hud-container">
-            <!-- Health bar arc (green/black ring) — drawn via SVG -->
+            <!-- Health bar arc (verde militar #4A7049 ring) -->
             <div class="health-ring">
                 <svg viewBox="0 0 200 200" id="health-svg">
                     <!-- Background arc (dark) -->
@@ -526,16 +526,16 @@
                         fill="none"
                         stroke="rgba(30,30,25,0.7)"
                         stroke-width="6"/>
-                    <!-- Health arc (green) — upper half -->
+                    <!-- Health arc (verde militar opaco #4A7049) -->
                     <circle cx="100" cy="100" r="95"
                         fill="none"
-                        stroke="#5a9e2f"
+                        stroke="#4A7049"
                         stroke-width="6"
                         stroke-dasharray="299 598"
                         stroke-dashoffset="0"
                         stroke-linecap="butt"
                         id="health-arc"/>
-                    <!-- Subtle tick marks at cardinal points -->
+                    <!-- Tick marks -->
                     <line x1="100" y1="2" x2="100" y2="8" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
                     <line x1="100" y1="192" x2="100" y2="198" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
                     <line x1="2" y1="100" x2="8" y2="100" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
@@ -553,7 +553,7 @@
                 <!-- Vignette overlay -->
                 <div class="vignette"></div>
 
-                <!-- Player marker — GTA IV white arrow with black stroke -->
+                <!-- Player marker — Fixed visually in center of radar -->
                 <div class="player-marker" id="player-marker">
                     <svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
                         <path d="M13 2 L21 23 L13 18 L5 23 Z"
@@ -576,7 +576,7 @@
             </div>
         </div>
 
-        <!-- Bottom HUD — street name + coords (GTA IV style) -->
+        <!-- Bottom HUD — street name + coords -->
         <div class="hud-bottom">
             <span class="hud-street-name" id="street-name">—</span>
             <div>
@@ -616,19 +616,8 @@
     </div>
 
     <script>
-        /* ╔══════════════════════════════════════════════════════════════════╗
-         * ║                                                                ║
-         * ║   >>>  PEGA TU ACCESS TOKEN DE MAPBOX EN LA LÍNEA DE ABAJO  <<<║
-         * ║                                                                ║
-         * ║   Obtén tu token gratuito en: https://account.mapbox.com/      ║
-         * ║                                                                ║
-         * ╚══════════════════════════════════════════════════════════════════╝ */
-
-        // ██████████████████████████████████████████████████████████████████
-        // ██  REEMPLAZA 'TU_ACCESS_TOKEN_AQUI' CON TU TOKEN DE MAPBOX   ██
-        // ██████████████████████████████████████████████████████████████████
+        // Access Token Intacto
         mapboxgl.accessToken = 'pk.eyJ1IjoicG9sMTBrIiwiYSI6ImNtdWxpM3F6dzAwcTIyd215cDE4bHh5NXcifQ.3h1DXZVz_-1esV7BZc-QKQ';
-        // ██████████████████████████████████████████████████████████████████
 
         // ===== DOM Elements =====
         const playerMarker   = document.getElementById('player-marker');
@@ -645,12 +634,14 @@
         const routeDistance  = document.getElementById('route-distance');
         const routeTime      = document.getElementById('route-time');
 
-        // ===== State =====
-        let followMode       = true;
-        let gpsAcquired      = false;
-        let currentCoords    = null;
-        let destinationCoords = null;
-        let destinationMarker = null;
+        // ===== State Variables =====
+        let followMode          = true;
+        let gpsAcquired         = false;
+        let currentCoords       = null; // { latitude, longitude }
+        let destinationCoords  = null; // [lng, lat]
+        let destinationMarker  = null;
+        let lastRouteFetchCoords = null; // { latitude, longitude }
+        let lastReverseGeocode   = 0;
 
         // ===== Initialize Map =====
         const map = new mapboxgl.Map({
@@ -661,7 +652,6 @@
             pitch: 0,
             bearing: 0,
             attributionControl: false,
-            logoPosition: 'bottom-right',
             interactive: true,
             dragRotate: false,
             touchZoomRotate: true,
@@ -669,7 +659,6 @@
             keyboard: false
         });
 
-        // Keep zoom gestures but disable rotation
         map.touchZoomRotate.disableRotation();
 
         // ===== Zoom Controls =====
@@ -685,29 +674,29 @@
 
         // ===== GTA IV Map Style Customization =====
         map.on('style.load', () => {
-            // 1. Dark, abstract radar background & land
-            try { map.setPaintProperty('land', 'background-color', '#121212'); } catch(e) {}
-            try { map.setPaintProperty('background', 'background-color', '#121212'); } catch(e) {}
+            // 1. Fondo del mapa (background & land): Gris oscuro / azulado exacto #2A2D34
+            try { map.setPaintProperty('land', 'background-color', '#2A2D34'); } catch(e) {}
+            try { map.setPaintProperty('background', 'background-color', '#2A2D34'); } catch(e) {}
 
-            // 2. Water — deep dark radar blue/black
-            try { map.setPaintProperty('water', 'fill-color', '#091018'); } catch(e) {}
+            // 2. Agua — Azul muy oscuro
+            try { map.setPaintProperty('water', 'fill-color', '#181E24'); } catch(e) {}
 
-            // 3. Parks & landuse — dark muted tones
+            // 3. Parques / Áreas verdes — Tono verde oscuro apagado
             const greenLayers = ['landuse', 'national-park', 'landcover'];
             greenLayers.forEach(layer => {
                 try {
-                    map.setPaintProperty(layer, 'fill-color', '#161d15');
-                    map.setPaintProperty(layer, 'fill-opacity', 0.6);
+                    map.setPaintProperty(layer, 'fill-color', '#1f2820');
+                    map.setPaintProperty(layer, 'fill-opacity', 0.5);
                 } catch(e) {}
             });
 
-            // 4. Buildings — subtle dark grey
+            // 4. Edificios — Gris oscuro
             try {
-                map.setPaintProperty('building', 'fill-color', '#1c1c1c');
-                map.setPaintProperty('building', 'fill-opacity', 0.5);
+                map.setPaintProperty('building', 'fill-color', '#22252a');
+                map.setPaintProperty('building', 'fill-opacity', 0.4);
             } catch(e) {}
 
-            // 5. Ocultar TODOS los textos, etiquetas y POIs (clean satellite radar view)
+            // 5. Ocultar capas de símbolos / textos para vista limpia de radar
             const styleLayers = map.getStyle().layers || [];
             styleLayers.forEach(layer => {
                 if (layer.type === 'symbol') {
@@ -717,43 +706,36 @@
                 }
             });
 
-            // 6. Configuración de CALLES GRUESAS (GTA Style)
-            // Color de calles: gris muy claro/blanco (#D3D3D3)
-            const gtaRoadColor = '#D3D3D3';
-            const gtaMajorRoadColor = '#E6E6E6';
-            const gtaCasingColor = '#000000';
+            // 6. Calles Dinámicas (line-width con interpolate zoom: min 1-2px at z12, max 8px at z18)
+            // Color de calles: gris claro / blanco opaco (#D3D3D3)
+            const roadColor = '#D3D3D3';
+            const roadCasingColor = '#1A1C20';
 
-            // Definición de anchos gruesos según zoom para calles principales y secundarias
-            const thickRoadWidthMajor = [
-                'interpolate', ['exponential', 1.5], ['zoom'],
-                10, 3,
-                12, 6,
-                14, 10,
-                16, 16,
-                18, 24,
-                20, 32
+            const roadWidthExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 1.5,
+                14, 3,
+                16, 5,
+                18, 8
             ];
 
-            const thickRoadWidthStandard = [
-                'interpolate', ['exponential', 1.5], ['zoom'],
-                10, 2,
-                12, 4.5,
-                14, 8,
-                16, 13,
-                18, 20,
-                20, 28
+            const roadWidthMinorExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 1,
+                14, 2,
+                16, 4,
+                18, 6
             ];
 
-            const thickRoadWidthMinor = [
-                'interpolate', ['exponential', 1.5], ['zoom'],
-                12, 2.5,
-                14, 5.5,
-                16, 9.5,
-                18, 15,
-                20, 22
+            const roadWidthMajorExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 2,
+                14, 4,
+                16, 6,
+                18, 8
             ];
 
-            // Road casing (borde negro sutil estilo radar si existe)
+            // Casing
             const casingLayers = [
                 'road-motorway-trunk-case', 'road-primary-case',
                 'road-secondary-tertiary-case', 'road-street-case',
@@ -761,49 +743,49 @@
             ];
             casingLayers.forEach(layer => {
                 try {
-                    map.setPaintProperty(layer, 'line-color', gtaCasingColor);
-                    map.setPaintProperty(layer, 'line-opacity', 0.7);
+                    map.setPaintProperty(layer, 'line-color', roadCasingColor);
+                    map.setPaintProperty(layer, 'line-opacity', 0.6);
                 } catch(e) {}
             });
 
             // Motorway & Trunk
             try {
-                map.setPaintProperty('road-motorway-trunk', 'line-color', gtaMajorRoadColor);
-                map.setPaintProperty('road-motorway-trunk', 'line-width', thickRoadWidthMajor);
+                map.setPaintProperty('road-motorway-trunk', 'line-color', roadColor);
+                map.setPaintProperty('road-motorway-trunk', 'line-width', roadWidthMajorExpr);
                 map.setPaintProperty('road-motorway-trunk', 'line-opacity', 1);
             } catch(e) {}
 
             // Primary
             try {
-                map.setPaintProperty('road-primary', 'line-color', gtaMajorRoadColor);
-                map.setPaintProperty('road-primary', 'line-width', thickRoadWidthMajor);
+                map.setPaintProperty('road-primary', 'line-color', roadColor);
+                map.setPaintProperty('road-primary', 'line-width', roadWidthMajorExpr);
                 map.setPaintProperty('road-primary', 'line-opacity', 1);
             } catch(e) {}
 
             // Secondary & Tertiary
             try {
-                map.setPaintProperty('road-secondary-tertiary', 'line-color', gtaRoadColor);
-                map.setPaintProperty('road-secondary-tertiary', 'line-width', thickRoadWidthStandard);
+                map.setPaintProperty('road-secondary-tertiary', 'line-color', roadColor);
+                map.setPaintProperty('road-secondary-tertiary', 'line-width', roadWidthExpr);
                 map.setPaintProperty('road-secondary-tertiary', 'line-opacity', 1);
             } catch(e) {}
 
-            // Streets & standard roads
+            // Streets
             try {
-                map.setPaintProperty('road-street', 'line-color', gtaRoadColor);
-                map.setPaintProperty('road-street', 'line-width', thickRoadWidthStandard);
+                map.setPaintProperty('road-street', 'line-color', roadColor);
+                map.setPaintProperty('road-street', 'line-width', roadWidthExpr);
                 map.setPaintProperty('road-street', 'line-opacity', 0.95);
             } catch(e) {}
 
-            // Minor, construction, path, pedestrian
+            // Minor roads
             ['road-minor', 'road-construction', 'road-path', 'road-pedestrian'].forEach(layer => {
                 try {
-                    map.setPaintProperty(layer, 'line-color', '#BFBFBF');
-                    map.setPaintProperty(layer, 'line-width', thickRoadWidthMinor);
+                    map.setPaintProperty(layer, 'line-color', roadColor);
+                    map.setPaintProperty(layer, 'line-width', roadWidthMinorExpr);
                     map.setPaintProperty(layer, 'line-opacity', 0.85);
                 } catch(e) {}
             });
 
-            // 7. Ruta de navegación GTA (amarilla con casing negro)
+            // 7. Ruta de navegación GTA (amarilla con borde negro)
             if (!map.getSource('route')) {
                 map.addSource('route', {
                     type: 'geojson',
@@ -818,13 +800,13 @@
                     paint: {
                         'line-color': '#000000',
                         'line-width': [
-                            'interpolate', ['exponential', 1.5], ['zoom'],
-                            12, 8,
-                            14, 13,
-                            16, 18,
-                            18, 26
+                            'interpolate', ['linear'], ['zoom'],
+                            12, 5,
+                            14, 8,
+                            16, 12,
+                            18, 16
                         ],
-                        'line-opacity': 0.75
+                        'line-opacity': 0.8
                     }
                 });
 
@@ -836,11 +818,11 @@
                     paint: {
                         'line-color': '#ffe600',
                         'line-width': [
-                            'interpolate', ['exponential', 1.5], ['zoom'],
-                            12, 5,
-                            14, 8,
-                            16, 12,
-                            18, 18
+                            'interpolate', ['linear'], ['zoom'],
+                            12, 3,
+                            14, 5,
+                            16, 8,
+                            18, 11
                         ],
                         'line-opacity': 1
                     }
@@ -854,22 +836,22 @@
             mapboxgl: mapboxgl,
             placeholder: 'Buscar destino…',
             language: 'es',
-            marker: false, // Ensure default mapbox marker is NEVER used
+            marker: false,
             flyTo: false,
             collapsed: false
         });
 
         document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
 
-        // When a search result is selected — place Custom GTA Mission Blip + route
+        // When user selects a destination
         geocoder.on('result', (e) => {
             const coords = e.result.center; // [lng, lat]
             destinationCoords = coords;
+            lastRouteFetchCoords = null; // Force initial route fetch
 
-            // Remove previous marker
             if (destinationMarker) destinationMarker.remove();
 
-            // Create Custom GTA Mission Blip (Yellow circle, black inner border, yellow outer glow)
+            // Create Custom GTA Mission Blip
             const blipEl = document.createElement('div');
             blipEl.className = 'gta-mission-blip';
 
@@ -880,21 +862,28 @@
             .setLngLat(coords)
             .addTo(map);
 
-            // Fly to show waypoint
-            map.flyTo({ center: coords, zoom: 16, duration: 1200 });
-            followMode = false;
-            recenterBtn.classList.add('visible');
-
-            // Calculate route if GPS is available
             if (currentCoords) {
-                fetchRoute(
-                    [currentCoords.longitude, currentCoords.latitude],
-                    coords
-                );
+                fetchRoute([currentCoords.longitude, currentCoords.latitude], coords);
+                lastRouteFetchCoords = { latitude: currentCoords.latitude, longitude: currentCoords.longitude };
             }
+
+            followMode = true;
+            recenterBtn.classList.remove('visible');
         });
 
-        // ===== Mapbox Directions API — Route Calculation =====
+        // ===== Distance Calculation (Haversine in meters) =====
+        function getDistanceInMeters(lat1, lon1, lat2, lon2) {
+            const R = 6371000;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        // ===== Mapbox Directions API — Dynamic Route =====
         async function fetchRoute(origin, destination) {
             const url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' +
                 origin[0] + ',' + origin[1] + ';' +
@@ -912,12 +901,10 @@
                         geometry: route.geometry
                     };
 
-                    // Update route on map
                     if (map.getSource('route')) {
                         map.getSource('route').setData(routeGeoJSON);
                     }
 
-                    // Show route info
                     const distKm = (route.distance / 1000).toFixed(1);
                     const durMin = Math.ceil(route.duration / 60);
                     routeDistance.textContent = distKm + ' km';
@@ -932,7 +919,6 @@
 
         // ===== Clear Route =====
         clearRouteBtn.addEventListener('click', () => {
-            // Remove route
             if (map.getSource('route')) {
                 map.getSource('route').setData({
                     type: 'Feature',
@@ -940,26 +926,20 @@
                 });
             }
 
-            // Remove waypoint marker
             if (destinationMarker) {
                 destinationMarker.remove();
                 destinationMarker = null;
             }
             destinationCoords = null;
+            lastRouteFetchCoords = null;
 
-            // Hide panels
             clearRouteBtn.classList.remove('visible');
             routeInfoPanel.classList.remove('visible');
 
-            // Re-follow GPS
             followMode = true;
             recenterBtn.classList.remove('visible');
             if (currentCoords) {
-                map.easeTo({
-                    center: [currentCoords.longitude, currentCoords.latitude],
-                    zoom: 16,
-                    duration: 800
-                });
+                map.setCenter([currentCoords.longitude, currentCoords.latitude]);
             }
         });
 
@@ -968,15 +948,11 @@
             followMode = true;
             recenterBtn.classList.remove('visible');
             if (currentCoords) {
-                map.easeTo({
-                    center: [currentCoords.longitude, currentCoords.latitude],
-                    zoom: 16,
-                    duration: 800
-                });
+                map.setCenter([currentCoords.longitude, currentCoords.latitude]);
             }
         });
 
-        // When user drags map, disable follow
+        // Disable camera follow when user drags map manually
         map.on('dragstart', () => {
             if (gpsAcquired) {
                 followMode = false;
@@ -1005,16 +981,14 @@
             }
         }
 
-        let lastReverseGeocode = 0;
-
-        // ===== GPS Tracking =====
+        // ===== Real-Time GPS Tracking & Dynamic Route Consumption =====
         if ('geolocation' in navigator) {
             navigator.geolocation.watchPosition(
                 onGPSSuccess,
                 onGPSError,
                 {
                     enableHighAccuracy: true,
-                    maximumAge: 2000,
+                    maximumAge: 0,
                     timeout: 10000
                 }
             );
@@ -1023,48 +997,55 @@
         }
 
         function onGPSSuccess(position) {
-            const { latitude, longitude, heading, speed } = position.coords;
+            const { latitude, longitude, heading } = position.coords;
             currentCoords = position.coords;
 
             // First fix
             if (!gpsAcquired) {
                 gpsAcquired = true;
                 loadingGPS.classList.add('hidden');
-                map.flyTo({
-                    center: [longitude, latitude],
-                    zoom: 16,
-                    duration: 1500
-                });
+                map.setCenter([longitude, latitude]);
             }
 
-            // Rotate player arrow based on heading
+            // Player arrow stays fixed in center of HUD; update heading rotation
             if (heading !== null && !isNaN(heading)) {
-                playerMarker.style.transform =
-                    'translate(-50%, -50%) rotate(' + heading + 'deg)';
+                playerMarker.style.transform = 'translate(-50%, -50%) rotate(' + heading + 'deg)';
             }
 
-            // Update coordinates
-            statusCoords.textContent =
-                latitude.toFixed(4) + ', ' + longitude.toFixed(4);
+            // Update bottom coordinates
+            statusCoords.textContent = latitude.toFixed(4) + ', ' + longitude.toFixed(4);
 
-            // Reverse geocode for street name (throttled)
+            // Camera Tracking: slide map under the fixed center arrow
+            if (followMode) {
+                map.setCenter([longitude, latitude]);
+            }
+
+            // Street name reverse geocoding (throttled every 5s)
             const now = Date.now();
             if (now - lastReverseGeocode > 5000) {
                 lastReverseGeocode = now;
                 reverseGeocode(longitude, latitude);
             }
 
-            // Center map if following
-            if (followMode) {
-                map.easeTo({
-                    center: [longitude, latitude],
-                    duration: 600
-                });
-            }
+            // Dynamic Route Consumption: Recalculate route if user moved >= 10-15 meters
+            if (destinationCoords) {
+                if (!lastRouteFetchCoords) {
+                    fetchRoute([longitude, latitude], destinationCoords);
+                    lastRouteFetchCoords = { latitude, longitude };
+                } else {
+                    const movedDistance = getDistanceInMeters(
+                        latitude,
+                        longitude,
+                        lastRouteFetchCoords.latitude,
+                        lastRouteFetchCoords.longitude
+                    );
 
-            // If we have a destination and route, update route from new position
-            if (destinationCoords && now - lastReverseGeocode > 15000) {
-                fetchRoute([longitude, latitude], destinationCoords);
+                    // Recalculate route when user advances 10 to 15 meters (threshold: 12 meters)
+                    if (movedDistance >= 12) {
+                        fetchRoute([longitude, latitude], destinationCoords);
+                        lastRouteFetchCoords = { latitude, longitude };
+                    }
+                }
             }
         }
 
@@ -1075,16 +1056,13 @@
                 2: '⚠ SEÑAL GPS NO DISPONIBLE',
                 3: '⚠ TIEMPO DE ESPERA GPS AGOTADO'
             };
-            loadingGPS.querySelector('span').textContent =
-                messages[error.code] || '⚠ ERROR GPS';
+            loadingGPS.querySelector('span').textContent = messages[error.code] || '⚠ ERROR GPS';
             loadingGPS.classList.remove('hidden');
         }
 
-        // ===== Service Worker Registration (optional for PWA) =====
+        // Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {
-                // Service worker not found — app still works without offline support
-            });
+            navigator.serviceWorker.register('sw.js').catch(() => {});
         }
     </script>
 </body>
