@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Mapa GTA IV HUD</title>
+    <title>Mapa GTA IV HUD 3D</title>
 
     <!-- ===== PWA / iOS / Android Meta Tags ===== -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -73,9 +73,9 @@
 
         .mapboxgl-ctrl-geocoder {
             background-color: rgba(18, 18, 16, 0.94) !important;
-            border: 1.5px solid #4a4a44 !important;
+            border: 2px solid #5a5a52 !important;
             border-radius: 4px !important;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.9) !important;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255,255,255,0.1) !important;
             min-width: 100% !important;
             width: 100% !important;
             max-width: 100% !important;
@@ -105,10 +105,10 @@
 
         .mapboxgl-ctrl-geocoder .suggestions {
             background-color: rgba(18, 18, 16, 0.98) !important;
-            border: 1.5px solid #4a4a44 !important;
+            border: 2px solid #5a5a52 !important;
             border-top: none !important;
             border-radius: 0 0 4px 4px !important;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9) !important;
         }
 
         .mapboxgl-ctrl-geocoder .suggestions > li > a {
@@ -136,13 +136,13 @@
             flex-shrink: 0;
         }
 
-        /* ===== HEALTH BAR RING ===== */
+        /* ===== HEALTH BAR RING (3D TUBULAR SHADOW FILTER & GRADIENT) ===== */
         .health-ring {
             position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
             border-radius: 50%;
             z-index: 5;
             pointer-events: none;
@@ -152,49 +152,52 @@
             width: 100%;
             height: 100%;
             transform: rotate(-90deg);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.9));
         }
 
-        /* ===== METALLIC BORDER RING ===== */
+        /* ===== MARCO METÁLICO 3D (3D BEVEL & METALLIC GRADIENT) ===== */
         .radar-bezel {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
             border-radius: 50%;
-            border: 3.5px solid #4a4a44;
-            background: linear-gradient(145deg, #383832, #242420, #383832);
+            border: 8px solid #2e302b;
+            background: linear-gradient(135deg, #74786d 0%, #3e4238 30%, #1c1e18 70%, #52564b 100%);
             box-shadow:
-                0 0 0 1px rgba(0,0,0,0.8),
-                inset 0 0 0 1px rgba(255,255,255,0.08),
-                0 6px 25px rgba(0,0,0,0.95),
-                0 0 45px rgba(0,0,0,0.6);
+                0 0 0 3px #0d0e0b,
+                inset 3px 3px 6px rgba(255, 255, 255, 0.4),
+                inset -4px -4px 8px rgba(0, 0, 0, 0.9),
+                0 12px 35px rgba(0, 0, 0, 0.95),
+                0 0 60px rgba(0, 0, 0, 0.8);
             z-index: 2;
         }
 
         .radar-bezel::after {
             content: '';
             position: absolute;
-            top: 3px;
-            left: 3px;
-            right: 3px;
-            bottom: 3px;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
             border-radius: 50%;
-            border: 1px solid rgba(90, 90, 80, 0.4);
-            box-shadow: inset 0 0 18px rgba(0,0,0,0.7);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.85);
         }
 
         /* ===== MAP CLIP CIRCLE ===== */
         .radar-clip {
             position: absolute;
-            top: 6px;
-            left: 6px;
-            right: 6px;
-            bottom: 6px;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            bottom: 8px;
             border-radius: 50%;
             overflow: hidden;
             z-index: 3;
             background: #2A2D34;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
         }
 
         /* ===== MAP ===== */
@@ -217,7 +220,28 @@
             display: none !important;
         }
 
-        /* ===== VIGNETTE (GTA Radar shading) ===== */
+        /* ===== CRT SCANLINES (TEXTURA DE PANTALLA GTA IV) ===== */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 12;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.22),
+                rgba(0, 0, 0, 0.22) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            opacity: 0.65;
+            mix-blend-mode: overlay;
+        }
+
+        /* ===== VIGNETTE (GTA Radar depth shading) ===== */
         .vignette {
             position: absolute;
             top: 0;
@@ -227,10 +251,10 @@
             border-radius: 50%;
             background: radial-gradient(
                 circle at center,
-                transparent 55%,
-                rgba(0, 0, 0, 0.18) 70%,
-                rgba(0, 0, 0, 0.45) 85%,
-                rgba(0, 0, 0, 0.75) 100%
+                transparent 50%,
+                rgba(0, 0, 0, 0.25) 68%,
+                rgba(0, 0, 0, 0.6) 84%,
+                rgba(0, 0, 0, 0.88) 100%
             );
             pointer-events: none;
             z-index: 10;
@@ -243,7 +267,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 20;
-            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.95));
+            filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.95));
             pointer-events: none;
             transition: transform 0.15s ease-out;
         }
@@ -264,19 +288,19 @@
 
         .north-letter {
             position: absolute;
-            top: 5px;
+            top: 6px;
             left: 50%;
             transform: translateX(-50%);
             color: #ffffff;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 900;
             font-family: 'Arial Black', 'Impact', sans-serif;
             text-shadow:
-                -1px -1px 0 #000,
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000,
-                 0 0 6px rgba(0,0,0,0.9);
+                -1.5px -1.5px 0 #000,
+                 1.5px -1.5px 0 #000,
+                -1.5px  1.5px 0 #000,
+                 1.5px  1.5px 0 #000,
+                 0 0 8px rgba(0,0,0,0.95);
             letter-spacing: 1px;
         }
 
@@ -289,8 +313,8 @@
             border: 3px solid #000000;
             box-shadow:
                 0 0 0 2px #ffe600,
-                0 0 10px rgba(255, 230, 0, 0.8),
-                0 2px 6px rgba(0, 0, 0, 0.9);
+                0 0 12px rgba(255, 230, 0, 0.9),
+                0 3px 8px rgba(0, 0, 0, 0.95);
             cursor: pointer;
             box-sizing: border-box;
             animation: blip-pulse 1.8s infinite ease-in-out;
@@ -304,8 +328,8 @@
                 transform: scale(1.18);
                 box-shadow:
                     0 0 0 2.5px #ffe600,
-                    0 0 16px rgba(255, 230, 0, 1),
-                    0 3px 8px rgba(0, 0, 0, 0.95);
+                    0 0 18px rgba(255, 230, 0, 1),
+                    0 3px 10px rgba(0, 0, 0, 0.95);
             }
         }
 
@@ -322,12 +346,12 @@
 
         .loading-gps span {
             display: block;
-            color: #4A7049;
+            color: #5b7a46;
             font-size: 10px;
             font-family: 'Courier New', monospace;
             letter-spacing: 1px;
             text-transform: uppercase;
-            text-shadow: 0 0 6px rgba(74, 112, 73, 0.6);
+            text-shadow: 0 0 6px rgba(91, 122, 70, 0.7);
             animation: blink 1.8s ease-in-out infinite;
             margin-top: 45px;
         }
@@ -394,15 +418,15 @@
             height: 46px;
             border-radius: 50%;
             background: rgba(20, 20, 16, 0.92);
-            border: 2px solid #4a4a44;
-            color: #4A7049;
+            border: 2px solid #5b7a46;
+            color: #7a9e62;
             font-size: 20px;
             cursor: pointer;
             z-index: 300;
             display: none;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
             transition: all 0.2s ease;
             -webkit-tap-highlight-color: transparent;
         }
@@ -518,37 +542,60 @@
 
         <!-- GTA IV HUD Radar -->
         <div class="hud-container">
-            <!-- Health bar arc (verde militar #4A7049 ring) -->
+            <!-- Health bar arc (Verde opaco #5b7a46 con relieve y degradado 3D tubular) -->
             <div class="health-ring">
                 <svg viewBox="0 0 200 200" id="health-svg">
-                    <!-- Background arc (dark) -->
+                    <defs>
+                        <!-- Sombra y profundidad 3D para el tubo de salud -->
+                        <filter id="health-tube-shadow" x="-30%" y="-30%" width="160%" height="160%">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="2.5" result="blur"/>
+                            <feOffset dx="1" dy="3" result="offsetblur"/>
+                            <feComponentTransfer>
+                                <feFuncA type="linear" slope="0.7"/>
+                            </feComponentTransfer>
+                            <feMerge>
+                                <feMergeNode/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                        <linearGradient id="health-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#7a9e62"/>
+                            <stop offset="50%" stop-color="#5b7a46"/>
+                            <stop offset="100%" stop-color="#3b522d"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Background arc track (tubo oscuro encastrado) -->
                     <circle cx="100" cy="100" r="95"
                         fill="none"
-                        stroke="rgba(30,30,25,0.7)"
-                        stroke-width="6"/>
-                    <!-- Health arc (verde militar opaco #4A7049) -->
+                        stroke="rgba(15,18,12,0.88)"
+                        stroke-width="8"/>
+                    <!-- Health arc (verde opaco 3D #5b7a46 con gradiente y relieve) -->
                     <circle cx="100" cy="100" r="95"
                         fill="none"
-                        stroke="#4A7049"
-                        stroke-width="6"
+                        stroke="url(#health-gradient)"
+                        stroke-width="7"
                         stroke-dasharray="299 598"
                         stroke-dashoffset="0"
-                        stroke-linecap="butt"
+                        stroke-linecap="round"
+                        filter="url(#health-tube-shadow)"
                         id="health-arc"/>
                     <!-- Tick marks -->
-                    <line x1="100" y1="2" x2="100" y2="8" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-                    <line x1="100" y1="192" x2="100" y2="198" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-                    <line x1="2" y1="100" x2="8" y2="100" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-                    <line x1="192" y1="100" x2="198" y2="100" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+                    <line x1="100" y1="2" x2="100" y2="8" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="100" y1="192" x2="100" y2="198" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="2" y1="100" x2="8" y2="100" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="192" y1="100" x2="198" y2="100" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
                 </svg>
             </div>
 
-            <!-- Metallic bezel -->
+            <!-- Metallic bezel 3D -->
             <div class="radar-bezel"></div>
 
             <!-- Map clipped to circle -->
             <div class="radar-clip">
                 <div id="map"></div>
+
+                <!-- Textura de pantalla CRT (Scanlines 3D de videojuego 2008) -->
+                <div class="scanlines"></div>
 
                 <!-- Vignette overlay -->
                 <div class="vignette"></div>
@@ -559,7 +606,7 @@
                         <path d="M13 2 L21 23 L13 18 L5 23 Z"
                               fill="#ffffff"
                               stroke="#000000"
-                              stroke-width="2"
+                              stroke-width="2.5"
                               stroke-linejoin="round"/>
                     </svg>
                 </div>
@@ -672,28 +719,28 @@
             northLetter.style.transform = 'translateX(-50%) rotate(' + bearing + 'deg)';
         });
 
-        // ===== GTA IV Map Style Customization =====
+        // ===== GTA IV Map Style Customization (3D Video Game Streets & Palette) =====
         map.on('style.load', () => {
             // 1. Fondo del mapa (background & land): Gris oscuro / azulado exacto #2A2D34
             try { map.setPaintProperty('land', 'background-color', '#2A2D34'); } catch(e) {}
             try { map.setPaintProperty('background', 'background-color', '#2A2D34'); } catch(e) {}
 
             // 2. Agua — Azul muy oscuro
-            try { map.setPaintProperty('water', 'fill-color', '#181E24'); } catch(e) {}
+            try { map.setPaintProperty('water', 'fill-color', '#141A22'); } catch(e) {}
 
-            // 3. Parques / Áreas verdes — Tono verde oscuro apagado
+            // 3. Parques / Áreas verdes — Tono verde oscuro opaco de juego 2008
             const greenLayers = ['landuse', 'national-park', 'landcover'];
             greenLayers.forEach(layer => {
                 try {
-                    map.setPaintProperty(layer, 'fill-color', '#1f2820');
-                    map.setPaintProperty(layer, 'fill-opacity', 0.5);
+                    map.setPaintProperty(layer, 'fill-color', '#19231B');
+                    map.setPaintProperty(layer, 'fill-opacity', 0.55);
                 } catch(e) {}
             });
 
-            // 4. Edificios — Gris oscuro
+            // 4. Edificios — Bloques gris oscuro
             try {
-                map.setPaintProperty('building', 'fill-color', '#22252a');
-                map.setPaintProperty('building', 'fill-opacity', 0.4);
+                map.setPaintProperty('building', 'fill-color', '#1E2128');
+                map.setPaintProperty('building', 'fill-opacity', 0.6);
             } catch(e) {}
 
             // 5. Ocultar capas de símbolos / textos para vista limpia de radar
@@ -706,28 +753,12 @@
                 }
             });
 
-            // 6. Calles Dinámicas (line-width con interpolate zoom: min 1-2px at z12, max 8px at z18)
-            // Color de calles: gris claro / blanco opaco (#D3D3D3)
-            const roadColor = '#D3D3D3';
-            const roadCasingColor = '#1A1C20';
+            // 6. Calles con Contorno (Casing + Fill para efecto 3D estilo videojuego 2008)
+            const roadFillColor = '#D3D3D3';      // Gris claro / blanco opaco
+            const roadCasingColor = '#14171A';    // Contorno gris oscuro / negro
 
-            const roadWidthExpr = [
-                'interpolate', ['linear'], ['zoom'],
-                12, 1.5,
-                14, 3,
-                16, 5,
-                18, 8
-            ];
-
-            const roadWidthMinorExpr = [
-                'interpolate', ['linear'], ['zoom'],
-                12, 1,
-                14, 2,
-                16, 4,
-                18, 6
-            ];
-
-            const roadWidthMajorExpr = [
+            // Fills (Rellenos)
+            const roadFillMajorExpr = [
                 'interpolate', ['linear'], ['zoom'],
                 12, 2,
                 14, 4,
@@ -735,57 +766,98 @@
                 18, 8
             ];
 
-            // Casing
-            const casingLayers = [
-                'road-motorway-trunk-case', 'road-primary-case',
-                'road-secondary-tertiary-case', 'road-street-case',
-                'road-minor-case'
+            const roadFillStreetExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 1.5,
+                14, 3,
+                16, 5,
+                18, 8
             ];
-            casingLayers.forEach(layer => {
-                try {
-                    map.setPaintProperty(layer, 'line-color', roadCasingColor);
-                    map.setPaintProperty(layer, 'line-opacity', 0.6);
-                } catch(e) {}
+
+            const roadFillMinorExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 1,
+                14, 2,
+                16, 4,
+                18, 6
+            ];
+
+            // Casings (Contornos: +2.5 a +4 px más gruesos que el relleno para crear el borde oscuro 3D)
+            const roadCasingMajorExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 4.5,
+                14, 7,
+                16, 10,
+                18, 12
+            ];
+
+            const roadCasingStreetExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 3.5,
+                14, 5.5,
+                16, 8,
+                18, 11
+            ];
+
+            const roadCasingMinorExpr = [
+                'interpolate', ['linear'], ['zoom'],
+                12, 2.5,
+                14, 4,
+                16, 6.5,
+                18, 9
+            ];
+
+            // Aplicar CASING (Capa de fondo para el contorno)
+            const casingMappings = [
+                { layers: ['road-motorway-trunk-case', 'road-primary-case'], width: roadCasingMajorExpr },
+                { layers: ['road-secondary-tertiary-case', 'road-street-case'], width: roadCasingStreetExpr },
+                { layers: ['road-minor-case'], width: roadCasingMinorExpr }
+            ];
+
+            casingMappings.forEach(group => {
+                group.layers.forEach(layer => {
+                    try {
+                        map.setPaintProperty(layer, 'line-color', roadCasingColor);
+                        map.setPaintProperty(layer, 'line-width', group.width);
+                        map.setPaintProperty(layer, 'line-opacity', 1);
+                    } catch(e) {}
+                });
             });
 
-            // Motorway & Trunk
+            // Aplicar FILL (Capa superior para el relleno de la calle)
             try {
-                map.setPaintProperty('road-motorway-trunk', 'line-color', roadColor);
-                map.setPaintProperty('road-motorway-trunk', 'line-width', roadWidthMajorExpr);
+                map.setPaintProperty('road-motorway-trunk', 'line-color', roadFillColor);
+                map.setPaintProperty('road-motorway-trunk', 'line-width', roadFillMajorExpr);
                 map.setPaintProperty('road-motorway-trunk', 'line-opacity', 1);
             } catch(e) {}
 
-            // Primary
             try {
-                map.setPaintProperty('road-primary', 'line-color', roadColor);
-                map.setPaintProperty('road-primary', 'line-width', roadWidthMajorExpr);
+                map.setPaintProperty('road-primary', 'line-color', roadFillColor);
+                map.setPaintProperty('road-primary', 'line-width', roadFillMajorExpr);
                 map.setPaintProperty('road-primary', 'line-opacity', 1);
             } catch(e) {}
 
-            // Secondary & Tertiary
             try {
-                map.setPaintProperty('road-secondary-tertiary', 'line-color', roadColor);
-                map.setPaintProperty('road-secondary-tertiary', 'line-width', roadWidthExpr);
+                map.setPaintProperty('road-secondary-tertiary', 'line-color', roadFillColor);
+                map.setPaintProperty('road-secondary-tertiary', 'line-width', roadFillStreetExpr);
                 map.setPaintProperty('road-secondary-tertiary', 'line-opacity', 1);
             } catch(e) {}
 
-            // Streets
             try {
-                map.setPaintProperty('road-street', 'line-color', roadColor);
-                map.setPaintProperty('road-street', 'line-width', roadWidthExpr);
+                map.setPaintProperty('road-street', 'line-color', roadFillColor);
+                map.setPaintProperty('road-street', 'line-width', roadFillStreetExpr);
                 map.setPaintProperty('road-street', 'line-opacity', 0.95);
             } catch(e) {}
 
-            // Minor roads
             ['road-minor', 'road-construction', 'road-path', 'road-pedestrian'].forEach(layer => {
                 try {
-                    map.setPaintProperty(layer, 'line-color', roadColor);
-                    map.setPaintProperty(layer, 'line-width', roadWidthMinorExpr);
-                    map.setPaintProperty(layer, 'line-opacity', 0.85);
+                    map.setPaintProperty(layer, 'line-color', roadFillColor);
+                    map.setPaintProperty(layer, 'line-width', roadFillMinorExpr);
+                    map.setPaintProperty(layer, 'line-opacity', 0.9);
                 } catch(e) {}
             });
 
-            // 7. Ruta de navegación GTA (amarilla con borde negro)
+            // 7. Ruta de navegación GTA (amarilla con borde negro en relieve)
             if (!map.getSource('route')) {
                 map.addSource('route', {
                     type: 'geojson',
@@ -801,12 +873,12 @@
                         'line-color': '#000000',
                         'line-width': [
                             'interpolate', ['linear'], ['zoom'],
-                            12, 5,
-                            14, 8,
-                            16, 12,
-                            18, 16
+                            12, 6,
+                            14, 9,
+                            16, 13,
+                            18, 17
                         ],
-                        'line-opacity': 0.8
+                        'line-opacity': 0.9
                     }
                 });
 
