@@ -125,6 +125,87 @@
 
         .mapboxgl-ctrl-geocoder--powered-by { display: none !important; }
 
+        /* ===== MENÚ INTERACTIVO DE ICONOS / BLIPS ===== */
+        #blip-menu-container {
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 12px) + 52px);
+            left: 14px;
+            z-index: 500;
+        }
+
+        .blip-menu-btn {
+            background: rgba(26, 26, 26, 0.85);
+            color: #ffffff;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .blip-menu-btn:active, .blip-menu-btn.active {
+            background: rgba(45, 45, 40, 0.95);
+            border-color: #ffe600;
+            color: #ffe600;
+        }
+
+        .blip-menu-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            background: rgba(22, 22, 20, 0.94);
+            border: 1px solid #3c3c38;
+            border-radius: 6px;
+            padding: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 135px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(6px);
+        }
+
+        .blip-menu-dropdown.hidden {
+            display: none;
+        }
+
+        .blip-option-btn {
+            background: transparent;
+            border: none;
+            color: #d0d0d0;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .blip-option-btn:hover, .blip-option-btn.selected {
+            background: rgba(255, 230, 0, 0.18);
+            color: #ffe600;
+        }
+
+        .blip-option-btn.danger:hover {
+            background: rgba(255, 60, 60, 0.2);
+            color: #ff5555;
+        }
+
         /* ===== GTA IV HUD — MAIN CONTAINER ===== */
         .hud-container {
             position: relative;
@@ -146,10 +227,7 @@
             border-radius: 50%;
             border: 9px solid #888b88;
             background: transparent;
-            box-shadow:
-                0 0 0 2px #000000,
-                inset 0 0 0 2px #000000,
-                0 8px 25px rgba(0, 0, 0, 0.75);
+            box-shadow: 0 0 0 2px #000000, 0 8px 25px rgba(0, 0, 0, 0.75);
             z-index: 2;
             pointer-events: none;
         }
@@ -172,7 +250,7 @@
             transform: rotate(-90deg);
         }
 
-        /* 3. BORDE INTERIOR NEGRO FINO (2px) & RECORTE CIRCULAR ESTRICTO DEL MAPA */
+        /* 3. BORDE INTERIOR NEGRO FINO (2px) & RECORTE CIRCULAR ESTRICTO DEL MAPA (LIMPIO) */
         .radar-clip {
             position: absolute;
             top: 0px;
@@ -182,6 +260,7 @@
             border-radius: 50% !important;
             overflow: hidden !important;
             border: 2px solid #000000 !important;
+            box-shadow: none !important;
             transform: translateZ(0) !important;
             -webkit-transform: translateZ(0) !important;
             -webkit-mask-image: -webkit-radial-gradient(white, black) !important;
@@ -190,7 +269,17 @@
             background: #6a7682;
         }
 
-        /* ===== MAP CONTAINER & CANVAS STRICT CIRCLE ===== */
+        .radar-clip::before,
+        .radar-clip::after,
+        #map::before,
+        #map::after {
+            display: none !important;
+            content: none !important;
+            box-shadow: none !important;
+            background-image: none !important;
+        }
+
+        /* ===== MAP CONTAINER & CANVAS STRICT CIRCLE (LIMPIEZA TOTAL DE SOMBRAS FANTASMA) ===== */
         #map {
             width: 100%;
             height: 100%;
@@ -199,6 +288,10 @@
             left: 0;
             border-radius: 50% !important;
             overflow: hidden !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background-image: none !important;
             transform: translateZ(0) !important;
             -webkit-transform: translateZ(0) !important;
             -webkit-mask-image: -webkit-radial-gradient(white, black) !important;
@@ -209,6 +302,9 @@
         #map canvas {
             border-radius: 50% !important;
             overflow: hidden !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
             -webkit-mask-image: -webkit-radial-gradient(white, black) !important;
             mask-image: radial-gradient(white, black) !important;
         }
@@ -305,6 +401,29 @@
                  1px  1px 0 #000,
                  0 0 6px rgba(0,0,0,0.9);
             letter-spacing: 1px;
+        }
+
+        /* ===== MARCADORES DE USUARIO (.gta-blip) ===== */
+        .gta-blip {
+            width: 30px;
+            height: 30px;
+            background-color: #000000;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.85);
+            cursor: pointer;
+            box-sizing: border-box;
+            pointer-events: auto;
+        }
+
+        .gta-blip svg {
+            display: block;
+            width: 16px;
+            height: 16px;
+            fill: #ffffff;
         }
 
         /* ===== CUSTOM GTA MISSION BLIP MARKER ===== */
@@ -543,6 +662,29 @@
         <!-- Search Bar -->
         <div id="geocoder"></div>
 
+        <!-- Menú Desplegable de Iconos -->
+        <div id="blip-menu-container">
+            <button id="blip-menu-toggle" class="blip-menu-btn" title="Añadir marcadores al mapa">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                <span>Iconos</span>
+            </button>
+            <div id="blip-menu-dropdown" class="blip-menu-dropdown hidden">
+                <button class="blip-option-btn" data-icon="house">
+                    <span>🏠</span> Casa
+                </button>
+                <button class="blip-option-btn" data-icon="weapon">
+                    <span>🔫</span> Arma
+                </button>
+                <button class="blip-option-btn danger" id="clear-blips-btn">
+                    <span>❌</span> Borrar Todos
+                </button>
+            </div>
+        </div>
+
         <!-- GTA IV HUD Radar -->
         <div class="hud-container">
             <!-- 1. Borde Exterior Gris Metálico Grueso -->
@@ -664,14 +806,24 @@
         const routeDistance  = document.getElementById('route-distance');
         const routeTime      = document.getElementById('route-time');
 
+        // Menú de Iconos DOM
+        const blipMenuToggle   = document.getElementById('blip-menu-toggle');
+        const blipMenuDropdown = document.getElementById('blip-menu-dropdown');
+        const blipOptionBtns   = document.querySelectorAll('.blip-option-btn[data-icon]');
+        const clearBlipsBtn    = document.getElementById('clear-blips-btn');
+
         // ===== State Variables =====
-        let followMode          = true;
-        let gpsAcquired         = false;
-        let currentCoords       = null; // { latitude, longitude }
-        let destinationCoords  = null; // [lng, lat]
-        let destinationMarker  = null;
-        let lastRouteFetchCoords = null; // { latitude, longitude }
-        let lastReverseGeocode   = 0;
+        let followMode           = true;
+        let gpsAcquired          = false;
+        let currentCoords        = null; // { latitude, longitude }
+        let destinationCoords   = null; // [lng, lat]
+        let destinationMarker   = null;
+        let lastRouteFetchCoords  = null; // { latitude, longitude }
+        let lastReverseGeocode    = 0;
+
+        // Estado del menú de iconos
+        let currentSelectedIcon  = null; // 'house' | 'weapon' | null
+        let userMarkers          = [];   // Array de Mapbox Markers añadidos por el usuario
 
         // ===== Initialize Map =====
         const map = new mapboxgl.Map({
@@ -690,6 +842,81 @@
         });
 
         map.touchZoomRotate.disableRotation();
+
+        // ===== Menú Desplegable de Iconos Lógica =====
+        blipMenuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            blipMenuDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!blipMenuDropdown.contains(e.target) && e.target !== blipMenuToggle) {
+                blipMenuDropdown.classList.add('hidden');
+            }
+        });
+
+        blipOptionBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const iconType = btn.getAttribute('data-icon');
+
+                if (currentSelectedIcon === iconType) {
+                    currentSelectedIcon = null;
+                    btn.classList.remove('selected');
+                    blipMenuToggle.classList.remove('active');
+                } else {
+                    blipOptionBtns.forEach(b => b.classList.remove('selected'));
+                    currentSelectedIcon = iconType;
+                    btn.classList.add('selected');
+                    blipMenuToggle.classList.add('active');
+                }
+                blipMenuDropdown.classList.add('hidden');
+            });
+        });
+
+        clearBlipsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Borrar todos los marcadores del usuario
+            userMarkers.forEach(m => m.remove());
+            userMarkers = [];
+
+            currentSelectedIcon = null;
+            blipOptionBtns.forEach(b => b.classList.remove('selected'));
+            blipMenuToggle.classList.remove('active');
+            blipMenuDropdown.classList.add('hidden');
+        });
+
+        // Evento Click en el Mapa para colocar icono seleccionado
+        map.on('click', (e) => {
+            if (!currentSelectedIcon) return;
+
+            const { lng, lat } = e.lngLat;
+            const blipEl = document.createElement('div');
+            blipEl.className = 'gta-blip';
+
+            if (currentSelectedIcon === 'house') {
+                blipEl.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                `;
+            } else if (currentSelectedIcon === 'weapon') {
+                blipEl.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 6H9.5L7.5 4H2v5h2.5L6 11v6h4v-3h1.5l7.5-6v-2zm-12 3H7V7h2v2z"/>
+                    </svg>
+                `;
+            }
+
+            const marker = new mapboxgl.Marker({
+                element: blipEl,
+                anchor: 'center'
+            })
+            .setLngLat([lng, lat])
+            .addTo(map);
+
+            userMarkers.push(marker);
+        });
 
         // ===== Zoom Controls =====
         zoomInBtn.addEventListener('click', () => map.zoomIn({ duration: 300 }));
