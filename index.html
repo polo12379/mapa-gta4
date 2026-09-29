@@ -217,7 +217,7 @@
             flex-shrink: 0;
         }
 
-        /* 1. BORDE EXTERIOR GRIS METÁLICO GRUESO (approx. 9px) */
+        /* 1. BORDE EXTERIOR GRIS METÁLICO GRUESO */
         .radar-bezel {
             position: absolute;
             top: -26px;
@@ -232,7 +232,7 @@
             pointer-events: none;
         }
 
-        /* 2. ANILLO DE VIDA VERDE (#5b7a46) ANCHO (approx. 18px stroke) */
+        /* 2. ANILLO DE VIDA VERDE (#5b7a46) ANCHO */
         .health-ring {
             position: absolute;
             top: -17px;
@@ -250,7 +250,7 @@
             transform: rotate(-90deg);
         }
 
-        /* 3. BORDE INTERIOR NEGRO FINO (2px) & RECORTE CIRCULAR ESTRICTO DEL MAPA (LIMPIO) */
+        /* 3. BORDE INTERIOR NEGRO FINO (2px) & RECORTE CIRCULAR ESTRICTO DEL MAPA */
         .radar-clip {
             position: absolute;
             top: 0px;
@@ -279,7 +279,21 @@
             background-image: none !important;
         }
 
-        /* ===== MAP CONTAINER & CANVAS STRICT CIRCLE (LIMPIEZA TOTAL DE SOMBRAS FANTASMA) ===== */
+        /* ===== ERRADICACIÓN TOTAL DE LÍNEAS / BORDES FANTASMA DE MAPBOX ===== */
+        .mapboxgl-canvas-container,
+        .mapboxgl-canvas,
+        .mapboxgl-map,
+        .mapboxgl-ctrl-top-left,
+        .mapboxgl-ctrl-top-right,
+        .mapboxgl-ctrl-bottom-left,
+        .mapboxgl-ctrl-bottom-right,
+        .mapboxgl-ctrl {
+            outline: none !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
         #map {
             width: 100%;
             height: 100%;
@@ -305,6 +319,7 @@
             border: none !important;
             outline: none !important;
             box-shadow: none !important;
+            background: transparent !important;
             -webkit-mask-image: -webkit-radial-gradient(white, black) !important;
             mask-image: radial-gradient(white, black) !important;
         }
@@ -403,27 +418,27 @@
             letter-spacing: 1px;
         }
 
-        /* ===== MARCADORES DE USUARIO (.gta-blip) ===== */
+        /* ===== DISEÑO AUTÉNTICO DE MARCADORES GTA IV (.gta-blip) ===== */
         .gta-blip {
-            width: 30px;
-            height: 30px;
-            background-color: #000000;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            width: auto !important;
+            height: auto !important;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.85);
             cursor: pointer;
-            box-sizing: border-box;
+            filter: drop-shadow(2px 2px 0px #000000);
             pointer-events: auto;
         }
 
         .gta-blip svg {
             display: block;
-            width: 16px;
-            height: 16px;
-            fill: #ffffff;
+            width: 24px;
+            height: 24px;
+            overflow: visible;
         }
 
         /* ===== CUSTOM GTA MISSION BLIP MARKER ===== */
@@ -876,7 +891,6 @@
 
         clearBlipsBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // Borrar todos los marcadores del usuario
             userMarkers.forEach(m => m.remove());
             userMarkers = [];
 
@@ -886,7 +900,7 @@
             blipMenuDropdown.classList.add('hidden');
         });
 
-        // Evento Click en el Mapa para colocar icono seleccionado
+        // Evento Click en el Mapa para colocar icono seleccionado (SVG puro con contorno negro)
         map.on('click', (e) => {
             if (!currentSelectedIcon) return;
 
@@ -896,13 +910,13 @@
 
             if (currentSelectedIcon === 'house') {
                 blipEl.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff" stroke="#000000" stroke-width="3" stroke-linejoin="round" overflow="visible" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
                     </svg>
                 `;
             } else if (currentSelectedIcon === 'weapon') {
                 blipEl.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#ffffff" stroke="#000000" stroke-width="3" stroke-linejoin="round" overflow="visible" xmlns="http://www.w3.org/2000/svg">
                         <path d="M21 6H9.5L7.5 4H2v5h2.5L6 11v6h4v-3h1.5l7.5-6v-2zm-12 3H7V7h2v2z"/>
                     </svg>
                 `;
@@ -915,8 +929,67 @@
             .setLngLat([lng, lat])
             .addTo(map);
 
+            marker.originalLngLat = [lng, lat];
             userMarkers.push(marker);
+            updateEdgeTracking();
         });
+
+        // ===== ANCLAJE AL BORDE / OFF-SCREEN MARKERS (EDGE TRACKING DE MINIMAPA) =====
+        function updateEdgeTracking() {
+            if (!map) return;
+
+            const radarClip = document.querySelector('.radar-clip');
+            if (!radarClip) return;
+
+            const radarWidth = radarClip.clientWidth;
+            const centerPx = map.project(map.getCenter());
+            const radarRadius = (radarWidth / 2) - 18;
+
+            // 1. Procesar marcadores de usuario
+            userMarkers.forEach(marker => {
+                const origCoords = marker.originalLngLat;
+                if (!origCoords) return;
+
+                const markerPx = map.project(origCoords);
+                const dx = markerPx.x - centerPx.x;
+                const dy = markerPx.y - centerPx.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > radarRadius) {
+                    const angle = Math.atan2(dy, dx);
+                    const clampedX = centerPx.x + radarRadius * Math.cos(angle);
+                    const clampedY = centerPx.y + radarRadius * Math.sin(angle);
+                    const clampedLngLat = map.unproject([clampedX, clampedY]);
+                    marker.setLngLat(clampedLngLat);
+                } else {
+                    marker.setLngLat(origCoords);
+                }
+            });
+
+            // 2. Procesar marcador de waypoint si existe
+            if (destinationMarker) {
+                const origCoords = destinationMarker.originalLngLat || destinationCoords;
+                if (origCoords) {
+                    const markerPx = map.project(origCoords);
+                    const dx = markerPx.x - centerPx.x;
+                    const dy = markerPx.y - centerPx.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > radarRadius) {
+                        const angle = Math.atan2(dy, dx);
+                        const clampedX = centerPx.x + radarRadius * Math.cos(angle);
+                        const clampedY = centerPx.y + radarRadius * Math.sin(angle);
+                        const clampedLngLat = map.unproject([clampedX, clampedY]);
+                        destinationMarker.setLngLat(clampedLngLat);
+                    } else {
+                        destinationMarker.setLngLat(origCoords);
+                    }
+                }
+            }
+        }
+
+        map.on('move', updateEdgeTracking);
+        map.on('render', updateEdgeTracking);
 
         // ===== Zoom Controls =====
         zoomInBtn.addEventListener('click', () => map.zoomIn({ duration: 300 }));
@@ -954,10 +1027,10 @@
                 map.setPaintProperty('building', 'fill-opacity', 0.45);
             } catch(e) {}
 
-            // 5. Ocultar capas de símbolos / textos para vista limpia de radar
+            // 5. Ocultar capas de símbolos / textos y líneas limítrofes/cuadrículas para limpieza absoluta
             const styleLayers = map.getStyle().layers || [];
             styleLayers.forEach(layer => {
-                if (layer.type === 'symbol') {
+                if (layer.type === 'symbol' || layer.id.includes('admin') || layer.id.includes('boundary')) {
                     try {
                         map.setLayoutProperty(layer.id, 'visibility', 'none');
                     } catch(e) {}
@@ -1139,6 +1212,8 @@
             .setLngLat(coords)
             .addTo(map);
 
+            destinationMarker.originalLngLat = coords;
+
             if (currentCoords) {
                 fetchRoute([currentCoords.longitude, currentCoords.latitude], coords);
                 lastRouteFetchCoords = { latitude: currentCoords.latitude, longitude: currentCoords.longitude };
@@ -1146,6 +1221,7 @@
 
             followMode = true;
             recenterBtn.classList.remove('visible');
+            updateEdgeTracking();
         });
 
         // ===== Distance Calculation (Haversine in meters) =====
